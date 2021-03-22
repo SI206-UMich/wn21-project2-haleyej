@@ -14,10 +14,29 @@ def get_titles_from_search_results(filename):
 
     [('Book title 1', 'Author 1'), ('Book title 2', 'Author 2')...]
     """
-    soup = BeautifulSoup(filename, 'html.parser')
-    tags = soup('a')
-    print(tags)
-    return tags
+    #get file, set up soup objectsand initialize list
+    f = open("search_results.htm", "r")
+    soup = BeautifulSoup(f, 'html.parser')
+    titles = []
+    f.close()
+    #going through each HTML layer
+    #LAYER 1: full page content
+    content = soup.find('div', class_ = 'content')
+    #LAYER 2: 'search' downward
+    maincontainer = content.find('div', class_ = 'mainContentContainer')
+    #LAYER 3: the left column of books
+    leftcontainer = maincontainer.find('div', class_ = 'leftContainer')
+    #LAYER 4: books list
+    tablecontainer = leftcontainer.find('table', class_ = 'tableList')
+    table = tablecontainer.find('tbody')
+    entries = table.find_all('tr')
+    #iterate through entires
+    for entry in entries:
+        title = entry.find("span", itemprop = "name").text
+        author = entry.find("a", class_ = "authorName").text
+        tup = (title, author)
+        titles.append(tup)
+    return titles
     
 
 
@@ -45,7 +64,6 @@ def get_search_links():
             if re.search(r"\/book\/show\/\S+", str(url)):
                 full_url = "https://www.goodreads.com" + url
                 urls.append(full_url)
-    print(urls)
     return urls[:10]
 
 
@@ -117,21 +135,31 @@ def extra_credit(filepath):
 class TestCases(unittest.TestCase):
 
     # call get_search_links() and save it to a static variable: search_urls
-
+    
+    search_urls = get_search_links()
 
     def test_get_titles_from_search_results(self):
         # call get_titles_from_search_results() on search_results.htm and save to a local variable
+        results = get_titles_from_search_results('search_results.htm')
 
         # check that the number of titles extracted is correct (20 titles)
 
+        self.assertEqual(len(results), 20)
+
         # check that the variable you saved after calling the function is a list
+        self.assertEqual((type(results)), list)
 
         # check that each item in the list is a tuple
+        for result in results:
+            self.assertEqual(type(result), tuple)
 
         # check that the first book and author tuple is correct (open search_results.htm and find it)
+        first = ("Harry Potter and the Deathly Hallows (Harry Potter, #7)", "J.K. Rowling")
+        self.assertEqual(results[0], first)
 
         # check that the last title is correct (open search_results.htm and find it)
-        pass
+        last = ("Harry Potter: The Prequel (Harry Potter, #0.5)", "J.K. Rowling")
+        self.assertEqual(results[-1], last)
 
     def test_get_search_links(self):
         # check that TestCases.search_urls is a list
