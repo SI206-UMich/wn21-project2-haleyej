@@ -39,13 +39,14 @@ def get_search_links():
     soup = BeautifulSoup(resp.content, 'html.parser')
     div = soup.find_all('div', class_ = "leftContainer")
     for item in div:
-        links = item.find_all('a')[:10]
+        links = item.find_all('a')
         for link in links:
-            print(link, "stop \n")
             url = link.get('href', None)
             if re.search(r"\/book\/show\/\S+", str(url)):
-                urls.append(url)
-    return None
+                full_url = "https://www.goodreads.com" + url
+                urls.append(full_url)
+    print(urls)
+    return urls[:10]
 
 
 
@@ -135,12 +136,21 @@ class TestCases(unittest.TestCase):
     def test_get_search_links(self):
         # check that TestCases.search_urls is a list
 
+        self.assertTrue(type(get_search_links()),list)
+
         # check that the length of TestCases.search_urls is correct (10 URLs)
 
-
+        self.assertEqual(len(get_search_links()), 10)
         # check that each URL in the TestCases.search_urls is a string
+        urls = get_search_links()
+        for url in urls:
+            self.assertTrue(type(url), str)
+
         # check that each URL contains the correct url for Goodreads.com followed by /book/show/
-        print(get_search_links())
+        reg = r"https:\/\/www\.goodreads\.com\/book\/show\/.+"
+        for url in urls:
+            self.assertIsNotNone(re.search(reg, url))
+
 
 
     def test_get_book_summary(self):
