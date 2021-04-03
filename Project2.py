@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 import requests
 import re
 import os
-import csv
+import csv 
 import unittest
 
 
@@ -248,22 +248,29 @@ class TestCases(unittest.TestCase):
 
         # read in the csv that you wrote (create a variable csv_lines - a list containing all the lines in the csv you just wrote to above)
         with open('test.csv', 'r') as f:
-            csv_lines = csv.reader('test.csv')
-            print(csv_lines)
+            csv_lines = csv.reader(f)
 
         # check that there are 21 lines in the csv
-            #self.assertEqual(len(list(csv_lines)), 21)
-
+            line_count = 0
+            for line in csv_lines:
+                line_count += 1
+            self.assertEqual(line_count, 21)
         # check that the header row is correct
-            self.assertEqual(csv_lines[0].strip(), 'Book title,Author Name')
+            line_count_2 = 0
+            for line in csv_lines:
+                if line_count_2 == 0:
+                    self.assertEqual(line.strip(), 'Book title,Author Name')
 
         # check that the next row is 'Harry Potter and the Deathly Hallows (Harry Potter, #7)', 'J.K. Rowling'
-            line = ('Harry Potter and the Deathly Hallows (Harry Potter, #7)', 'J.K. Rowling')
-            self.assertEqual(csv_lines[1].strip(), line)
+                elif line_count_2 == 1:
+                    test_line_1 = ('Harry Potter and the Deathly Hallows (Harry Potter, #7)', 'J.K. Rowling')
+                    self.assertEqual(line, test_line_1)
 
         # check that the last row is 'Harry Potter: The Prequel (Harry Potter, #0.5)', 'J.K. Rowling'
-            line = ('Harry Potter: The Prequel (Harry Potter, #0.5)', 'J.K. Rowling')
-            self.assertEqual(csv_lines[-1].strip(), line)
+                elif line_count_2 == 21:
+                    line = ('Harry Potter: The Prequel (Harry Potter, #0.5)', 'J.K. Rowling')
+                    self.assertEqual(csv_lines[-1].strip(), line)
+                line_count_2 += 1
 
 
 
