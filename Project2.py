@@ -103,7 +103,21 @@ def summarize_best_books(filepath):
     ("Fiction", "The Testaments (The Handmaid's Tale, #2)", "https://www.goodreads.com/choiceawards/best-fiction-books-2020") 
     to your list of tuples.
     """
-    pass
+    with open(filepath) as f:
+        soup = BeautifulSoup(f, "html.parser")
+
+    best_tups = []
+    genres = soup.find_all("div", class_ = "category clearFix")
+
+    for item in genres:
+        link = item.find("a")
+        image = link.find("img", class_ = "category__winnerImage")
+        genre = link.find('h4').text
+        url = link['href']
+        title = image['alt']
+        info = (str(genre.strip()), str(title), str(url))
+        best_tups.append(info)
+    return best_tups
 
 
 def write_csv(data, filename):
@@ -228,16 +242,25 @@ class TestCases(unittest.TestCase):
     def test_summarize_best_books(self):
         # call summarize_best_books and save it to a variable
 
+        best = summarize_best_books('/Users/haleyjohnson/Desktop/SI206/wn21-project2-haleyej/best_books_2020.htm')
+
         # check that we have the right number of best books (20)
 
+        self.assertEqual(len(best), 20)
+
             # assert each item in the list of best books is a tuple
+        for book in best:
+            self.assertEqual(type(book), tuple)
 
             # check that each tuple has a length of 3
+            self.assertEqual(len(book), 3)
 
         # check that the first tuple is made up of the following 3 strings:'Fiction', "The Midnight Library", 'https://www.goodreads.com/choiceawards/best-fiction-books-2020'
+        self.assertEqual(best[0], ('Fiction', "The Midnight Library", 'https://www.goodreads.com/choiceawards/best-fiction-books-2020'))
 
         # check that the last tuple is made up of the following 3 strings: 'Picture Books', 'A Beautiful Day in the Neighborhood: The Poetry of Mister Rogers', 'https://www.goodreads.com/choiceawards/best-picture-books-2020'
-        pass
+        self.assertEqual(best[-1], ('Picture Books', 'Antiracist Baby', 'https://www.goodreads.com/choiceawards/best-picture-books-2020'))
+        
 
 
     def test_write_csv(self):
@@ -261,12 +284,12 @@ class TestCases(unittest.TestCase):
                 if line_count_2 == 0:
                     self.assertEqual(line.strip(), 'Book title,Author Name')
 
-        # check that the next row is 'Harry Potter and the Deathly Hallows (Harry Potter, #7)', 'J.K. Rowling'
+                # check that the next row is 'Harry Potter and the Deathly Hallows (Harry Potter, #7)', 'J.K. Rowling'
                 elif line_count_2 == 1:
                     test_line_1 = ('Harry Potter and the Deathly Hallows (Harry Potter, #7)', 'J.K. Rowling')
                     self.assertEqual(line, test_line_1)
 
-        # check that the last row is 'Harry Potter: The Prequel (Harry Potter, #0.5)', 'J.K. Rowling'
+                # check that the last row is 'Harry Potter: The Prequel (Harry Potter, #0.5)', 'J.K. Rowling'
                 elif line_count_2 == 21:
                     line = ('Harry Potter: The Prequel (Harry Potter, #0.5)', 'J.K. Rowling')
                     self.assertEqual(csv_lines[-1].strip(), line)
